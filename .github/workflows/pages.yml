@@ -25,20 +25,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
-      # Limpio lock si vino de Windows y puede romper opcionales
-      - name: Clean lockfile
-        run: rm -f package-lock.json
+      # 🔧 instalación limpia para evitar binarios de Windows
+      - name: Clean node_modules + lock
+        run: rm -rf node_modules package-lock.json
 
       - name: Install deps
         run: npm install --no-audit --no-fund
 
-      # 👇 Fix rollup: instala el binario que el runner Linux espera
-      - name: Install rollup native for Linux
-        run: npm i -D @rollup/rollup-linux-x64-gnu
+      # 🔧 re-instalar binario correcto de esbuild para Linux
+      - name: Rebuild esbuild for Linux
+        run: npm rebuild esbuild
 
-      # Llamo a vite desde node para evitar permisos del binario
+      # (opcional) fix rollup nativo si vuelve a quejarse
+      - name: Ensure rollup native (Linux)
+        run: npm i -D @rollup/rollup-linux-x64-gnu || true
+
+      # Ejecutar Vite vía node para evitar permisos del binario
       - name: Build
         run: node ./node_modules/vite/bin/vite.js build
 
@@ -57,3 +60,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
