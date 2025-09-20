@@ -18,7 +18,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      ROLLUP_SKIP_NODEJS_NATIVE: '1'   # fuerza a usar la impl JS
+      ROLLUP_SKIP_NODEJS_NATIVE: '1'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,8 +35,8 @@ jobs:
       - name: Install deps
         run: npm install --no-audit --no-fund
 
-      - name: Build
-        run: npm run build
+      - name: Build (call vite via node)
+        run: node ./node_modules/vite/bin/vite.js build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
