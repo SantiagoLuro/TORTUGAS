@@ -17,8 +17,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      ROLLUP_SKIP_NODEJS_NATIVE: '1'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,13 +27,19 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Clean lockfile (workaround npm optional deps)
+      # Limpio lock si vino de Windows y puede romper opcionales
+      - name: Clean lockfile
         run: rm -f package-lock.json
 
       - name: Install deps
         run: npm install --no-audit --no-fund
 
-      - name: Build (call vite via node)
+      # 👇 Fix rollup: instala el binario que el runner Linux espera
+      - name: Install rollup native for Linux
+        run: npm i -D @rollup/rollup-linux-x64-gnu
+
+      # Llamo a vite desde node para evitar permisos del binario
+      - name: Build
         run: node ./node_modules/vite/bin/vite.js build
 
       - name: Upload artifact
